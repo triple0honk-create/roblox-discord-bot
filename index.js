@@ -18,7 +18,7 @@ const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const DISCORD_USER_ID = process.env.DISCORD_USER_ID;
 const ROBLOX_USER_ID = Number(process.env.ROBLOX_USER_ID);
 const CHECK_INTERVAL = Number(process.env.CHECK_INTERVAL || 30000);
-const PING_ROLE_NAME = "necessarily married to ralph";
+const PING_ROLE_NAME = "Joh pingger";
 
 const ROBLOX_NAMES = {
   769284458: "JOHAAAA"

@@ -161,7 +161,7 @@ async function checkUser() {
 
     if (enteredGame) {
       await channel.send({
-        content: `${mention} GAME TIME LETS GO`,
+        content: `${mention} JAHHH PLAYING ${presence.lastLocation}.`,
         allowedMentions
       });
     }

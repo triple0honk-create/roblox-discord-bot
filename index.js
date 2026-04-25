@@ -215,7 +215,14 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    await interaction.editReply(formatPresence(presence));
+    let reply = formatPresence(presence);
+
+    // If user is in a game, append the game location
+    if (presence.userPresenceType === 2 && presence.lastLocation) {
+      reply += `\nCurrently playing: ${presence.lastLocation}`;
+    }
+
+    await interaction.editReply(reply);
   }
 
   if (interaction.commandName === "lastlogin") {

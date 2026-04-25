@@ -154,7 +154,7 @@ async function checkUser() {
 
     if (websiteOnline) {
       await channel.send({
-        content: `${mention} JAHHH ONLINE.`,
+        content: `${mention} JAHH ON WEBSITE.`,
         allowedMentions
       });
     }

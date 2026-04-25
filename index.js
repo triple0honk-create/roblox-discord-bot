@@ -225,7 +225,7 @@ client.on("interactionCreate", async (interaction) => {
       reply = `JAHH PLAYING ${presence.lastLocation} OMG. YAY.`;
     } else {
       // Online but not in game
-      reply = "JAHH ROBLOX OMG YAYY";
+      reply = "Jah picking game. or afk pooning. patience.";
     }
 
     await interaction.editReply(reply);

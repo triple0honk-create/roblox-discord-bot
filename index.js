@@ -216,15 +216,13 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    const lastOnline = presence.lastOnline ? new Date(presence.lastOnline) : null;
-    if (!lastOnline || isNaN(lastOnline.getTime())) {
-      await interaction.editReply("Last login information not available.");
+    const lastLocation = presence.lastLocation;
+    if (!lastLocation) {
+      await interaction.editReply("Last login information not available from Roblox API.");
       return;
     }
 
-    const timeAgo = Date.now() - lastOnline.getTime();
-    const formatted = formatDuration(timeAgo);
-    await interaction.editReply(`Last login: ${formatted} ago`);
+    await interaction.editReply(`Last location: ${lastLocation}`);
   }
 });
 

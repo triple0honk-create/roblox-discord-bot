@@ -130,8 +130,9 @@ async function checkUser() {
     inGameSince = null;
   }
 
-  if (wentOnline || wentOffline) {
-    const name = getRobloxName(ROBLOX_USER_ID);
+  const websiteOnline = lastStatus === 0 && currentStatus === 1;
+
+  if (websiteOnline || enteredGame || leftGame) {
     const role = channel.guild ? await findPingRole(channel.guild) : null;
     const mention = role ? `<@&${role.id}>` : `<@${DISCORD_USER_ID}>`;
 
@@ -139,20 +140,31 @@ async function checkUser() {
       console.warn(`Role "${PING_ROLE_NAME}" not found, falling back to user mention`);
     }
 
-    let message;
-    if (wentOnline) {
-      message = `${mention} JAHHH ONLINE.`;
-    } else {
-      message = `${mention} jah gone. :(`;
+    const allowedMentions = {
+      users: role ? [] : [DISCORD_USER_ID],
+      roles: role ? [role.id] : []
+    };
+
+    if (websiteOnline) {
+      await channel.send({
+        content: `${mention} JAHHH ONLINE.`,
+        allowedMentions
+      });
     }
 
-    await channel.send({
-      content: message,
-      allowedMentions: {
-        users: role ? [] : [DISCORD_USER_ID],
-        roles: role ? [role.id] : []
-      }
-    });
+    if (enteredGame) {
+      await channel.send({
+        content: `${mention} GAME TIME LETS GO`,
+        allowedMentions
+      });
+    }
+
+    if (leftGame) {
+      await channel.send({
+        content: `${mention} jah left the game. :(`,
+        allowedMentions
+      });
+    }
   }
 
   lastStatus = currentStatus;

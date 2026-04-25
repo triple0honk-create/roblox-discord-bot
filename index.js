@@ -215,11 +215,17 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    let reply = formatPresence(presence);
+    let reply;
 
-    // If user is in a game, append the game location
-    if (presence.userPresenceType === 2 && presence.lastLocation) {
-      reply += `\nCurrently playing: ${presence.lastLocation}`;
+    if (presence.userPresenceType === 0) {
+      // Offline
+      reply = "jah dead. gone. i sad.";
+    } else if (presence.userPresenceType === 2 && presence.lastLocation) {
+      // In a game
+      reply = `JAHH PLAYING ${presence.lastLocation} OMG. YAY.`;
+    } else {
+      // Online but not in game
+      reply = "JAHH ROBLOX OMG YAYY";
     }
 
     await interaction.editReply(reply);

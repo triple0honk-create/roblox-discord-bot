@@ -79,25 +79,12 @@ function isOnline(presenceType) {
 
 function formatPresence(presence) {
   const type = presence.userPresenceType;
-  const label = PRESENCE_LABELS[type] || `Unknown (${type})`;
-  const name = getRobloxName(ROBLOX_USER_ID);
 
-  let extra = "";
-  if (type === 2 && presence.lastLocation) {
-    extra = ` — ${presence.lastLocation}`;
-    if (inGameSince) {
-      extra += ` (for ${formatDuration(Date.now() - inGameSince)})`;
-    }
-  } else if (type === 0 && presence.lastOnline) {
-    const last = new Date(presence.lastOnline);
-    extra = ` (last online ${last.toLocaleString()})`;
-    if (lastSessionDurationMs) {
-      const where = lastSessionLocation ? ` in ${lastSessionLocation}` : "";
-      extra += ` — last in-game session: ${formatDuration(lastSessionDurationMs)}${where}`;
-    }
+  if (type === 0) {
+    return "jah dead. gone. i sad.";
   }
 
-  return `**${name}** is **${label}**${extra}`;
+  return "JAHH ROBLOX OMG YAYY";
 }
 
 async function findPingRole(guild) {

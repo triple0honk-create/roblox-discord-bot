@@ -174,15 +174,19 @@ const statusCommand = new SlashCommandBuilder()
   .setName("status")
   .setDescription("Check the current Roblox presence of the watched user");
 
+const lastloginCommand = new SlashCommandBuilder()
+  .setName("lastlogin")
+  .setDescription("Check when the watched user last logged in");
+
 async function registerCommands(guildId) {
   const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN);
 
   try {
     await rest.put(
       Routes.applicationGuildCommands(client.user.id, guildId),
-      { body: [statusCommand.toJSON()] }
+      { body: [statusCommand.toJSON(), lastloginCommand.toJSON()] }
     );
-    console.log(`Registered /status in guild ${guildId}`);
+    console.log(`Registered /status and /lastlogin in guild ${guildId}`);
   } catch (err) {
     console.error("Failed to register slash commands:", err);
   }
@@ -190,17 +194,38 @@ async function registerCommands(guildId) {
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  if (interaction.commandName !== "status") return;
 
-  await interaction.deferReply();
+  if (interaction.commandName === "status") {
+    await interaction.deferReply();
 
-  const presence = await getRobloxPresence(ROBLOX_USER_ID);
-  if (!presence) {
-    await interaction.editReply("Could not fetch Roblox presence right now.");
-    return;
+    const presence = await getRobloxPresence(ROBLOX_USER_ID);
+    if (!presence) {
+      await interaction.editReply("Could not fetch Roblox presence right now.");
+      return;
+    }
+
+    await interaction.editReply(formatPresence(presence));
   }
 
-  await interaction.editReply(formatPresence(presence));
+  if (interaction.commandName === "lastlogin") {
+    await interaction.deferReply();
+
+    const presence = await getRobloxPresence(ROBLOX_USER_ID);
+    if (!presence) {
+      await interaction.editReply("Could not fetch Roblox presence right now.");
+      return;
+    }
+
+    const lastOnline = presence.lastOnline ? new Date(presence.lastOnline) : null;
+    if (!lastOnline || isNaN(lastOnline.getTime())) {
+      await interaction.editReply("Last login information not available.");
+      return;
+    }
+
+    const timeAgo = Date.now() - lastOnline.getTime();
+    const formatted = formatDuration(timeAgo);
+    await interaction.editReply(`Last login: ${formatted} ago`);
+  }
 });
 
 client.once("ready", async () => {

@@ -18,7 +18,7 @@ const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const DISCORD_USER_ID = process.env.DISCORD_USER_ID;
 const ROBLOX_USER_ID = Number(process.env.ROBLOX_USER_ID);
 const CHECK_INTERVAL = Number(process.env.CHECK_INTERVAL || 30000);
-const PING_ROLE_NAME = "josh ping";
+const PING_ROLE_NAME = "necessarily married to ralph";
 
 const ROBLOX_NAMES = {
   769284458: "JOHAAAA"
@@ -154,20 +154,9 @@ async function checkUser() {
 
     let message;
     if (wentOnline) {
-      let extra = "";
-      if (currentStatus === 2 && presence.lastLocation) {
-        extra = ` (in game: ${presence.lastLocation})`;
-      } else if (currentStatus === 3) {
-        extra = " (in Roblox Studio)";
-      }
-      message = `${mention} **${name}** is online${extra}`;
+      message = `${mention} JAHHH ONLINE.`;
     } else {
-      let extra = "";
-      if (endedSessionDurationMs) {
-        const where = endedSessionLocation ? ` in **${endedSessionLocation}**` : "";
-        extra = ` — was in-game for **${formatDuration(endedSessionDurationMs)}**${where}`;
-      }
-      message = `${mention} **${name}** is offline${extra}`;
+      message = `${mention} jah gone. :(`;
     }
 
     await channel.send({

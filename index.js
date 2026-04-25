@@ -37,6 +37,7 @@ let lastStatus = null;
 let inGameSince = null;
 let lastSessionDurationMs = null;
 let lastSessionLocation = null;
+let lastOfflineTime = null;
 
 const PRESENCE_LABELS = {
   0: "Offline",
@@ -113,6 +114,10 @@ async function checkUser() {
 
   const wentOnline = wasOnline === false && currentlyOnline === true;
   const wentOffline = wasOnline === true && currentlyOnline === false;
+
+  if (wentOffline) {
+    lastOfflineTime = Date.now();
+  }
   const enteredGame = lastStatus !== 2 && currentStatus === 2;
   const leftGame = lastStatus === 2 && currentStatus !== 2;
 
@@ -174,6 +179,10 @@ const statusCommand = new SlashCommandBuilder()
   .setName("status")
   .setDescription("Check the current Roblox presence of the watched user");
 
+const lastplayedCommand = new SlashCommandBuilder()
+  .setName("lastplayed")
+  .setDescription("Check the last location the watched user played");
+
 const lastloginCommand = new SlashCommandBuilder()
   .setName("lastlogin")
   .setDescription("Check when the watched user last logged in");
@@ -184,9 +193,9 @@ async function registerCommands(guildId) {
   try {
     await rest.put(
       Routes.applicationGuildCommands(client.user.id, guildId),
-      { body: [statusCommand.toJSON(), lastloginCommand.toJSON()] }
+      { body: [statusCommand.toJSON(), lastloginCommand.toJSON(), lastplayedCommand.toJSON()] }
     );
-    console.log(`Registered /status and /lastlogin in guild ${guildId}`);
+    console.log(`Registered /status, /lastlogin, and /lastplayed in guild ${guildId}`);
   } catch (err) {
     console.error("Failed to register slash commands:", err);
   }
@@ -210,21 +219,32 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.commandName === "lastlogin") {
     await interaction.deferReply();
 
+    if (!lastOfflineTime) {
+      await interaction.editReply("No offline data recorded yet.");
+      return;
+    }
+
+    const timeAgo = Date.now() - lastOfflineTime;
+    const formatted = formatDuration(timeAgo);
+    await interaction.editReply(`Last login: ${formatted} ago`);
+  }
+
+  if (interaction.commandName === "lastplayed") {
+    await interaction.deferReply();
+
     const presence = await getRobloxPresence(ROBLOX_USER_ID);
     if (!presence) {
       await interaction.editReply("Could not fetch Roblox presence right now.");
       return;
     }
 
-    const lastOnline = presence.lastOnline ? new Date(presence.lastOnline) : null;
-    if (!lastOnline || isNaN(lastOnline.getTime())) {
-      await interaction.editReply("Last login information not available.");
+    const lastLocation = presence.lastLocation;
+    if (!lastLocation) {
+      await interaction.editReply("Last played information not available from Roblox API.");
       return;
     }
 
-    const timeAgo = Date.now() - lastOnline.getTime();
-    const formatted = formatDuration(timeAgo);
-    await interaction.editReply(`Last login: ${formatted} ago`);
+    await interaction.editReply(`Last played: ${lastLocation}`);
   }
 });
 

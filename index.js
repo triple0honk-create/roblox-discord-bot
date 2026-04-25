@@ -37,6 +37,7 @@ let lastStatus = null;
 let inGameSince = null;
 let lastSessionDurationMs = null;
 let lastSessionLocation = null;
+let lastGameLocation = null;
 let lastOfflineTime = null;
 
 const PRESENCE_LABELS = {
@@ -124,6 +125,7 @@ async function checkUser() {
   if (enteredGame) {
     inGameSince = Date.now();
     lastSessionLocation = presence.lastLocation || null;
+    lastGameLocation = presence.lastLocation || null;
   }
 
   let endedSessionDurationMs = null;
@@ -232,19 +234,12 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.commandName === "lastplayed") {
     await interaction.deferReply();
 
-    const presence = await getRobloxPresence(ROBLOX_USER_ID);
-    if (!presence) {
-      await interaction.editReply("Could not fetch Roblox presence right now.");
+    if (!lastGameLocation) {
+      await interaction.editReply("No game location recorded yet.");
       return;
     }
 
-    const lastLocation = presence.lastLocation;
-    if (!lastLocation) {
-      await interaction.editReply("Last played information not available from Roblox API.");
-      return;
-    }
-
-    await interaction.editReply(`Last played: ${lastLocation}`);
+    await interaction.editReply(`Last played: ${lastGameLocation}`);
   }
 });
 

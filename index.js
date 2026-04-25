@@ -215,14 +215,17 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
+    console.log(`/status called - presence type: ${presence.userPresenceType}, lastLocation: ${presence.lastLocation}`);
+
     let reply;
 
     if (presence.userPresenceType === 0) {
       // Offline
       reply = "jah dead. gone. i sad.";
-    } else if (presence.userPresenceType === 2 && presence.lastLocation) {
+    } else if (presence.userPresenceType === 2) {
       // In a game
-      reply = `JAHH PLAYING ${presence.lastLocation} OMG. YAY.`;
+      const gameName = presence.lastLocation || "Unknown Game";
+      reply = `JAHH PLAYING ${gameName}.`;
     } else {
       // Online but not in game
       reply = "Jah picking game. or afk pooning. patience.";

@@ -17,8 +17,19 @@ const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const DISCORD_USER_ID = process.env.DISCORD_USER_ID;
 const ROBLOX_USER_ID = Number(process.env.ROBLOX_USER_ID);
-const CHECK_INTERVAL = Number(process.env.CHECK_INTERVAL || 30000);
 const PING_ROLE_NAME = "Joh pingger";
+
+function getCheckInterval() {
+  const now = new Date();
+  // Get current hour in GMT+8
+  const gmt8Hour = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Shanghai" })).getHours();
+  // Daytime: 04:00–19:59 GMT+8 → 20 seconds
+  if (gmt8Hour >= 4 && gmt8Hour <= 19) {
+    return 20000;
+  }
+  // Nighttime: 20:00–23:59 and 00:00–03:59 GMT+8 → 10 seconds
+  return 10000;
+}
 
 const ROBLOX_NAMES = {
   769284458: "JOHAAAA"
@@ -295,7 +306,22 @@ client.once("ready", async () => {
     }
   }
 
-  setInterval(checkUser, CHECK_INTERVAL);
+  let currentInterval = getCheckInterval();
+  console.log(`[Interval] Starting with check interval: ${currentInterval}ms`);
+
+  const scheduleNext = () => {
+    const interval = getCheckInterval();
+    if (interval !== currentInterval) {
+      console.log(`[Interval] Switching check interval: ${currentInterval}ms → ${interval}ms`);
+      currentInterval = interval;
+    }
+    setTimeout(async () => {
+      await checkUser();
+      scheduleNext();
+    }, currentInterval);
+  };
+
+  scheduleNext();
 });
 
 client.login(DISCORD_TOKEN);

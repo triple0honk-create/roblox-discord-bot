@@ -16,6 +16,7 @@ const client = new Client({
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const DISCORD_USER_ID = process.env.DISCORD_USER_ID;
+const ROBLOX_COOKIE = process.env.ROBLOX_COOKIE;
 const ROBLOX_USER_ID = 769284458;
 const PING_ROLE_NAME = "Joh pingger";
 
@@ -74,7 +75,8 @@ function formatDuration(ms) {
 async function getRobloxPresence(userId) {
   const headers = {
     "Content-Type": "application/json",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    ...(ROBLOX_COOKIE ? { "Cookie": `.ROBLOSECURITY=${ROBLOX_COOKIE}` } : {})
   };
 
   const payload = { userIds: [userId] };
@@ -308,7 +310,7 @@ client.on("interactionCreate", async (interaction) => {
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  console.log("[Startup] Using RoProxy for presence requests (fallback: official Roblox API) — no authentication required.");
+  console.log(`[Startup] Using RoProxy for presence requests (fallback: official Roblox API) — authentication: ${ROBLOX_COOKIE ? "cookie set (.ROBLOSECURITY)" : "none (ROBLOX_COOKIE not set)"}.`);
 
   let channel = null;
   try {

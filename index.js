@@ -17,6 +17,7 @@ const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const DISCORD_USER_ID = process.env.DISCORD_USER_ID;
 const ROBLOX_USER_ID = Number(process.env.ROBLOX_USER_ID);
+const ROBLOX_COOKIE = process.env.ROBLOX_COOKIE;
 const PING_ROLE_NAME = "Joh pingger";
 
 function getCheckInterval() {
@@ -72,11 +73,23 @@ function formatDuration(ms) {
 }
 
 async function getRobloxPresence(userId) {
+  const authenticated = !!ROBLOX_COOKIE;
+  console.debug(`[getRobloxPresence] Making ${authenticated ? "authenticated" : "unauthenticated"} request for userId`, userId);
+
+  const headers = {
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  };
+
+  if (authenticated) {
+    headers["Cookie"] = `.ROBLOSECURITY=${ROBLOX_COOKIE}`;
+  }
+
   try {
     const res = await axios.post(
       "https://presence.roblox.com/v1/presence/users",
       { userIds: [userId] },
-      { headers: { "Content-Type": "application/json" } }
+      { headers }
     );
 
     console.debug("[getRobloxPresence] Raw API response:", JSON.stringify(res.data, null, 2));
@@ -86,7 +99,11 @@ async function getRobloxPresence(userId) {
 
     return presence;
   } catch (err) {
-    console.error("[getRobloxPresence] API error for userId", userId, "— status:", err.response?.status, "— body:", JSON.stringify(err.response?.data, null, 2), "— message:", err.message);
+    if (err.response?.status === 403) {
+      console.error("[getRobloxPresence] 403 Forbidden — the ROBLOX_COOKIE may be invalid, expired, or a CSRF token is required. Check that ROBLOX_COOKIE is set correctly.");
+    } else {
+      console.error("[getRobloxPresence] API error for userId", userId, "— status:", err.response?.status, "— body:", JSON.stringify(err.response?.data, null, 2), "— message:", err.message);
+    }
     return null;
   }
 }
@@ -277,6 +294,12 @@ client.on("interactionCreate", async (interaction) => {
 
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
+
+  if (!ROBLOX_COOKIE) {
+    console.warn("[Startup] WARNING: ROBLOX_COOKIE is not set. Presence requests will be unauthenticated and may return stale or incorrect data.");
+  } else {
+    console.log("[Startup] ROBLOX_COOKIE is set — presence requests will be authenticated.");
+  }
 
   let channel = null;
   try {

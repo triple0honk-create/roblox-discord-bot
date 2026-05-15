@@ -79,9 +79,14 @@ async function getRobloxPresence(userId) {
       { headers: { "Content-Type": "application/json" } }
     );
 
-    return res.data.userPresences[0];
+    console.debug("[getRobloxPresence] Raw API response:", JSON.stringify(res.data, null, 2));
+
+    const presence = res.data.userPresences[0];
+    console.debug("[getRobloxPresence] Parsed presence object for userId", userId, ":", JSON.stringify(presence, null, 2));
+
+    return presence;
   } catch (err) {
-    console.error("Roblox API error:", err.response?.data || err.message);
+    console.error("[getRobloxPresence] API error for userId", userId, "— status:", err.response?.status, "— body:", JSON.stringify(err.response?.data, null, 2), "— message:", err.message);
     return null;
   }
 }
@@ -117,6 +122,8 @@ async function checkUser() {
 
   const presence = await getRobloxPresence(ROBLOX_USER_ID);
   if (!presence) return;
+
+  console.debug("[checkUser] Full presence object being processed:", JSON.stringify(presence, null, 2));
 
   const currentStatus = presence.userPresenceType;
   const currentlyOnline = isOnline(currentStatus);

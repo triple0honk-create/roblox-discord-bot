@@ -269,8 +269,8 @@ client.on("interactionCreate", async (interaction) => {
       // Offline
       reply = "jah dead. gone. i sad.";
     } else if (presence.userPresenceType === 2) {
-      // In a game - use the tracked game location
-      const gameName = lastGameLocation || "Unknown Game";
+      // In a game - prefer live lastLocation from API, fall back to tracked lastGameLocation
+      const gameName = presence.lastLocation || lastGameLocation || "Unknown Game";
       reply = `JAHH PLAYING ${gameName}.`;
     } else {
       // Online but not in game

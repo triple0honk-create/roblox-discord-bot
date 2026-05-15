@@ -16,7 +16,7 @@ const client = new Client({
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const DISCORD_USER_ID = process.env.DISCORD_USER_ID;
-const ROBLOX_USER_ID = 313506675;
+const ROBLOX_USER_ID = 769284458;
 const PING_ROLE_NAME = "Joh pingger";
 
 function getCheckInterval() {
@@ -32,7 +32,7 @@ function getCheckInterval() {
 }
 
 const ROBLOX_NAMES = {
-  313506675: "JOHAAAA"
+  769284458: "JOHAAAA"
 };
 
 function getRobloxName(userId) {

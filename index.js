@@ -72,17 +72,19 @@ function formatDuration(ms) {
 }
 
 async function getRobloxPresence(userId) {
-  console.debug(`[getRobloxPresence] Making request via RoProxy for userId`, userId);
-
   const headers = {
     "Content-Type": "application/json",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
   };
 
+  const payload = { userIds: [userId] };
+
+  // Attempt 1: RoProxy
   try {
+    console.debug(`[getRobloxPresence] Attempting RoProxy for userId`, userId);
     const res = await axios.post(
       "https://api.roProxy.xyz/presence/users",
-      { userIds: [userId] },
+      payload,
       { headers }
     );
 
@@ -90,10 +92,31 @@ async function getRobloxPresence(userId) {
 
     const presence = res.data.userPresences[0];
     console.debug("[getRobloxPresence] Parsed presence object for userId", userId, ":", JSON.stringify(presence, null, 2));
+    console.log("[getRobloxPresence] Endpoint used: RoProxy");
 
     return presence;
   } catch (err) {
-    console.error("[getRobloxPresence] RoProxy API error for userId", userId, "— status:", err.response?.status, "— body:", JSON.stringify(err.response?.data, null, 2), "— message:", err.message);
+    console.warn("[getRobloxPresence] RoProxy failed for userId", userId, "— status:", err.response?.status, "— message:", err.message, "— falling back to Roblox API");
+  }
+
+  // Attempt 2: Official Roblox API
+  try {
+    console.debug(`[getRobloxPresence] Attempting official Roblox API for userId`, userId);
+    const res = await axios.post(
+      "https://presence.roblox.com/v1/presence/users",
+      payload,
+      { headers }
+    );
+
+    console.debug("[getRobloxPresence] Raw Roblox API response:", JSON.stringify(res.data, null, 2));
+
+    const presence = res.data.userPresences[0];
+    console.debug("[getRobloxPresence] Parsed presence object for userId", userId, ":", JSON.stringify(presence, null, 2));
+    console.log("[getRobloxPresence] Endpoint used: Roblox API (fallback)");
+
+    return presence;
+  } catch (err) {
+    console.error("[getRobloxPresence] Roblox API fallback also failed for userId", userId, "— status:", err.response?.status, "— body:", JSON.stringify(err.response?.data, null, 2), "— message:", err.message);
     return null;
   }
 }
@@ -285,7 +308,7 @@ client.on("interactionCreate", async (interaction) => {
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  console.log("[Startup] Using RoProxy for presence requests — no authentication required.");
+  console.log("[Startup] Using RoProxy for presence requests (fallback: official Roblox API) — no authentication required.");
 
   let channel = null;
   try {
